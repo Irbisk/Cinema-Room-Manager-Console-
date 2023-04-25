@@ -5,23 +5,43 @@ const val FREE_SEAT = 'S'
 const val OCCUPIED_SEAT = 'B'
 
 fun main() {
+    startGame()
+}
+
+fun startGame() {
     println("Enter the number of rows:")
     val rows = readln().toInt()
     println("Enter the number of seats in each row:")
     val seatsInRows = readln().toInt()
+
     var grid = MutableList(rows) { MutableList(seatsInRows) { FREE_SEAT } }
-    println()
-    printTheatre(grid)
-    println("Enter a row number:")
-    val row = readln().toInt()
-    println("Enter a seat number in that row:")
-    val seat = readln().toInt()
 
-    println("Ticket price: $${getPrice(row, grid)}")
-    println()
-    grid = buySeat(row, seat, grid)
-    printTheatre(grid)
+    while (true) {
+        println("1. Show the seats\n" +
+                "2. Buy a ticket\n" +
+                "0. Exit")
+        val command = readln().toInt()
+        when (command) {
+            1 -> printTheatre(grid)
+            2 -> grid = buyATicket(grid)
+            else -> break
+        }
+    }
+}
 
+fun buyATicket(grid: MutableList<MutableList<Char>>): MutableList<MutableList<Char>> {
+    while (true) {
+        println("Enter a row number:")
+        val row = readln().toInt()
+        println("Enter a seat number in that row:")
+        val seat = readln().toInt()
+        if (grid[row - 1][seat - 1] == 'S') {
+            grid[row - 1][seat - 1] = 'B'
+            println("Ticket price: $${getPrice(row, grid)}")
+            break
+        } else println("Seat is occupied")
+    }
+    return grid
 }
 
 fun printTheatre(grid: MutableList<MutableList<Char>>) {
