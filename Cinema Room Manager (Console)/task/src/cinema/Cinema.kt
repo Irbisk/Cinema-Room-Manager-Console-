@@ -3,6 +3,9 @@ package cinema
 
 const val FREE_SEAT = 'S'
 const val OCCUPIED_SEAT = 'B'
+var currentIncome = 0
+var grid = mutableListOf(mutableListOf<Char>())
+
 
 fun main() {
     startGame()
@@ -14,37 +17,58 @@ fun startGame() {
     println("Enter the number of seats in each row:")
     val seatsInRows = readln().toInt()
 
-    var grid = MutableList(rows) { MutableList(seatsInRows) { FREE_SEAT } }
+    grid = MutableList(rows) { MutableList(seatsInRows) { FREE_SEAT } }
 
     while (true) {
         println("1. Show the seats\n" +
                 "2. Buy a ticket\n" +
+                "3. Statistics\n" +
                 "0. Exit")
         val command = readln().toInt()
         when (command) {
-            1 -> printTheatre(grid)
-            2 -> grid = buyATicket(grid)
+            1 -> printTheatre()
+            2 -> grid = buyATicket()
+            3 -> statistics()
             else -> break
         }
     }
 }
 
-fun buyATicket(grid: MutableList<MutableList<Char>>): MutableList<MutableList<Char>> {
+fun buyATicket(): MutableList<MutableList<Char>> {
     while (true) {
         println("Enter a row number:")
         val row = readln().toInt()
         println("Enter a seat number in that row:")
         val seat = readln().toInt()
-        if (grid[row - 1][seat - 1] == 'S') {
-            grid[row - 1][seat - 1] = 'B'
-            println("Ticket price: $${getPrice(row, grid)}")
-            break
-        } else println("Seat is occupied")
+        //just for training purposes via exception
+        try {
+            if (grid[row - 1][seat - 1] == FREE_SEAT) {
+                grid[row - 1][seat - 1] = OCCUPIED_SEAT
+                println("Ticket price: $${getPrice(row)}")
+                println()
+                currentIncome += getPrice(row)
+                break
+            } else println("That ticket has already been purchased!")
+        } catch (e: IndexOutOfBoundsException) {
+            println("Wrong input!")
+        }
+
     }
     return grid
 }
+fun statistics() {
+    val countTickets = grid.joinToString("").count { it == 'B' }
+    val totalIncome = countTotalIncome()
+    val percentage = countTickets.toDouble() / (grid.size.toDouble() * grid[0].size.toDouble()) * 100
 
-fun printTheatre(grid: MutableList<MutableList<Char>>) {
+    println("Number of purchased tickets: $countTickets")
+    println("Percentage: ${"%.2f".format(percentage)}%")
+    println("Current Income: $$currentIncome")
+    println("Total Income: $$totalIncome")
+    println()
+}
+
+fun printTheatre() {
     println("Cinema:")
     println("  ${grid[0].indices.joinToString(" ") { (it + 1).toString() }}")
     for (i in grid.indices) {
@@ -53,12 +77,7 @@ fun printTheatre(grid: MutableList<MutableList<Char>>) {
     println()
 }
 
-fun buySeat(x: Int, y: Int, grid: MutableList<MutableList<Char>>): MutableList<MutableList<Char>> {
-    grid[x - 1][y - 1] = OCCUPIED_SEAT
-    return grid
-}
-
-fun countTotalIncome(grid: MutableList<MutableList<Char>>): Int {
+fun countTotalIncome(): Int {
     val totalSeats = grid.size * grid[0].size
     return if (totalSeats < 60) {
         totalSeats * 10
@@ -69,7 +88,7 @@ fun countTotalIncome(grid: MutableList<MutableList<Char>>): Int {
     }
 }
 
-fun getPrice( x: Int, grid: MutableList<MutableList<Char>>): Int {
+fun getPrice( x: Int): Int {
     val totalSeats = grid.size * grid[0].size
     return if (totalSeats < 60) {
         10
