@@ -3,6 +3,7 @@ package cinema
 
 const val FREE_SEAT = 'S'
 const val OCCUPIED_SEAT = 'B'
+var currentIncome = 0
 
 fun main() {
     startGame()
@@ -19,11 +20,13 @@ fun startGame() {
     while (true) {
         println("1. Show the seats\n" +
                 "2. Buy a ticket\n" +
+                "3. Statistics\n" +
                 "0. Exit")
         val command = readln().toInt()
         when (command) {
             1 -> printTheatre(grid)
             2 -> grid = buyATicket(grid)
+            3 -> statistics(grid)
             else -> break
         }
     }
@@ -35,13 +38,32 @@ fun buyATicket(grid: MutableList<MutableList<Char>>): MutableList<MutableList<Ch
         val row = readln().toInt()
         println("Enter a seat number in that row:")
         val seat = readln().toInt()
-        if (grid[row - 1][seat - 1] == 'S') {
-            grid[row - 1][seat - 1] = 'B'
-            println("Ticket price: $${getPrice(row, grid)}")
-            break
-        } else println("Seat is occupied")
+        //just for training purposes via exception
+        try {
+            if (grid[row - 1][seat - 1] == 'S') {
+                grid[row - 1][seat - 1] = 'B'
+                println("Ticket price: $${getPrice(row, grid)}")
+                println()
+                currentIncome += getPrice(row, grid)
+                break
+            } else println("That ticket has already been purchased!")
+        } catch (e: IndexOutOfBoundsException) {
+            println("Wrong input!")
+        }
+
     }
     return grid
+}
+fun statistics(grid: MutableList<MutableList<Char>>) {
+    val countTickets = grid.joinToString("").count { it == 'B' }
+    val totalIncome = countTotalIncome(grid)
+    val percentage = countTickets.toDouble() / (grid.size.toDouble() * grid[0].size.toDouble()) * 100
+
+    println("Number of purchased tickets: $countTickets")
+    println("Percentage: ${"%.2f".format(percentage)}%")
+    println("Current Income: $$currentIncome")
+    println("Total Income: $$totalIncome")
+    println()
 }
 
 fun printTheatre(grid: MutableList<MutableList<Char>>) {
